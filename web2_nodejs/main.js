@@ -159,6 +159,43 @@ var app = http.createServer(function(request, response) {
         response.end(template);
       });
     });
+  } else if (pathname === '/update_process') {
+    //  title = 'update_process';
+    var body = '';
+    request.on('data', function(data) {
+      body += data;
+    });
+    request.on('end', function() {
+      var post = qs.parse(body);
+      var id = post.id;
+      var title = post.title;
+      var description = post.description;
+      console.log(post);
+
+      if (id !== title) {
+        console.log(`${id} !== ${title}`);
+        fs.rename(`data/${id}`, `data/${title}`, function(err) {
+          fs.writeFile(`./data/${title}`, description, 'utf8', (err) => {
+            if (err) throw err;
+            console.log('The file has been saved!');
+            response.writeHead(301, {
+              Location: `/?id=${title}`
+            });
+            response.end('success');
+          });
+        });
+      } else {
+        fs.writeFile(`./data/${title}`, description, 'utf8', (err) => {
+          if (err) throw err;
+          console.log('The file has been saved!');
+          response.writeHead(301, {
+            Location: `/?id=${title}`
+          });
+          response.end('success');
+        });
+      }
+    });
+
   } else {
     response.writeHead(404);
     response.end('Not found');
